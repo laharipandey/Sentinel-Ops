@@ -1,0 +1,38 @@
+[
+  {
+    "id": "INC-2025-11-04",
+    "type": "incident",
+    "title": "Redis Connection Pool Starvation during Flash Sale",
+    "service": "payment-gateway",
+    "trigger_pattern": "time.sleep(0.25)",
+    "description": "Removing the 250ms debouncer buffer in webhook_processor caused connection pool exhaustion on SBI/HDFC bank callback spikes.",
+    "root_cause": "External bank APIs take variable time. Without the 250ms buffer, concurrent incoming webhooks saturated Redis worker threads, causing a 45-minute outage.",
+    "verified_patch": "Restore 250ms debounce or implement token-bucket rate limiting via async buffer queue.",
+    "author": "Ravi K. (Staff SRE)",
+    "severity": "CRITICAL-P0"
+  },
+  {
+    "id": "ADR-042",
+    "type": "adr",
+    "title": "Preserve Legacy XML Token Serializer in Auth Service",
+    "service": "auth-service",
+    "trigger_pattern": "xml_serializer",
+    "description": "Do not refactor the legacy XML serializer to pure JSON in auth handler.",
+    "root_cause": "Two primary enterprise banking partners rely on legacy XML tokens. Refactoring to strict JSON causes authentication handshake failure on partner webhooks.",
+    "verified_patch": "Keep dual serializer fallback (XML for legacy partner tokens, JSON for modern consumers).",
+    "author": "Engineering Architecture Council",
+    "severity": "HIGH-P1"
+  },
+  {
+    "id": "INC-2026-02-14",
+    "type": "incident",
+    "title": "Postgres Read Replica Deadlock in Checkout Service",
+    "service": "checkout-service",
+    "trigger_pattern": "SELECT FOR UPDATE",
+    "description": "Using raw SELECT FOR UPDATE across unindexed inventory tables caused database lock cascade.",
+    "root_cause": "Lock contention on cart inventory table blocked order transactions during high-concurrency peak.",
+    "verified_patch": "Use optimistic locking with version fields instead of pessimistic database locks.",
+    "author": "Karthik M. (Principal Architect)",
+    "severity": "CRITICAL-P0"
+  }
+]
